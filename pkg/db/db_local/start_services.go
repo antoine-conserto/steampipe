@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
-	"syscall"
 
 	"github.com/jackc/pgx/v5"
 	psutils "github.com/shirou/gopsutil/process"
@@ -484,10 +483,7 @@ func createCmd(ctx context.Context, port int, listenAddresses []string) *exec.Cm
 	}
 
 	// set group pgid attributes on the command to ensure the process is not shutdown when its parent terminates
-	postgresCmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid:    true,
-		Foreground: false,
-	}
+	postgresCmd.SysProcAttr = utils.GetSysProcAttr()
 
 	return postgresCmd
 }

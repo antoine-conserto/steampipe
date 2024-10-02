@@ -156,10 +156,7 @@ func RunForService(ctx context.Context, serverListen ListenType, serverPort List
 	cmd.Env = os.Environ()
 
 	// set group pgid attributes on the command to ensure the process is not shutdown when its parent terminates
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid:    true,
-		Foreground: false,
-	}
+	cmd.SysProcAttr = utils.GetSysProcAttr()
 
 	err = cmd.Start()
 	if err != nil {

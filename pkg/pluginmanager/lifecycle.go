@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os/exec"
-	"syscall"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/logging"
 	"github.com/turbot/steampipe-plugin-sdk/v5/sperr"
-	"github.com/turbot/steampipe/pkg/constants"
-	"github.com/turbot/steampipe/pkg/filepaths"
 	"github.com/turbot/steampipe/pkg/pluginmanager_service/grpc"
 	pb "github.com/turbot/steampipe/pkg/pluginmanager_service/grpc/proto"
 	pluginshared "github.com/turbot/steampipe/pkg/pluginmanager_service/grpc/shared"
@@ -45,14 +41,7 @@ func StartNewInstance(steampipeExecutablePath string) (*State, error) {
 func start(steampipeExecutablePath string) (*State, error) {
 	// note: we assume the install dir has been assigned to file_paths.SteampipeDir
 	// - this is done both by the FDW and Steampipe
-	pluginManagerCmd := exec.Command(steampipeExecutablePath,
-		"plugin-manager",
-		"--"+constants.ArgInstallDir, filepaths.SteampipeDir)
-	// set attributes on the command to ensure the process is not shutdown when its parent terminates
-	pluginManagerCmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
-
+	pluginManagerCmd := getPluginManagerCmd(steampipeExecutablePath)
 	// discard logging from the plugin manager client (plugin manager logs will still flow through to the log file
 	// as this is set up in the plugin manager)
 	logger := logging.NewLogger(&hclog.LoggerOptions{Name: "plugin", Output: io.Discard})
